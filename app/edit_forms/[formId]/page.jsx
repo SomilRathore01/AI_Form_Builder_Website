@@ -10,6 +10,8 @@ import FormUI from '../_components/FormUI'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import Controller from '../_components/Controller'
+import { RWebShare } from 'react-web-share'
 
 
 
@@ -20,6 +22,8 @@ const EditForm = ({ params }) => {
     const [updateTrigger, setUpdateTrigger] = useState();
     const [record, setRecord] = useState([]);
     const [selectedTheme, setselectedTheme] = useState('light')
+    const [selectedBG, setSelectedBG] = useState()
+    const [selectedStyle, setSelectedStyle] = useState();
 
     useEffect(() => {
         user && GetFormData();
@@ -30,6 +34,9 @@ const EditForm = ({ params }) => {
         setRecord(result[0])
         console.log(JSON.parse(result[0].jsonform));
         setJsonForm(JSON.parse(result[0].jsonform))
+        setSelectedBG(result[0].background)
+        setselectedTheme(result[0].theme)
+        setSelectedStyle(result[0].styles)
     }
 
     useEffect(() => {
@@ -64,6 +71,15 @@ const EditForm = ({ params }) => {
 
     }
 
+    const updateFields = async (value, columnName) => {
+        const result = await db.update(Jsonforms).set({
+            [columnName]: value
+        }).where(and(eq(Jsonforms.id, record.id)), eq(Jsonforms.createdBy, user?.primaryEmailAddress?.emailAddress))
+            .returning({ id: Jsonforms.id })
+        toast.success("Updated !!")
+    }
+
+
     return (
         <div className='p-10'>
             <div className='flex justify-between items-center'>
@@ -71,18 +87,38 @@ const EditForm = ({ params }) => {
                     <ArrowLeft />Back
                 </h2>
                 <div className='flex gap-2'>
-                    <Link href={'/aiform/'+record?.id} target='_blank'>
-                    <Button className='flex gap-2'><SquareArrowOutUpRight className='h-5 w-5'/>Live Preview</Button>
+                    <Link href={'/aiform/' + record?.id} target='_blank'>
+                        <Button className='flex gap-2 btn btn-primary'><SquareArrowOutUpRight className='h-5 w-5' />Live Preview</Button>
                     </Link>
-                    <Button className='flex gap-2'><Share2 className='h-5 w-5'/>Share</Button>
+                    <RWebShare
+                        data={{
+                            text: jsonForm?.formSubHeading + "Build your own form in seconds",
+                            url: process.env.NEXT_PUBLIC_BASE_URL+"/aiform/"+record?.id,
+                            title: jsonForm?.formTitle,
+                        }}
+                        onClick={() => console.log("shared successfully!")}
+                    >
+                        <Button className='flex gap-2 bg-primary'><Share2 className='h-5 w-5' />Share</Button>
+                    </RWebShare>
                 </div>
             </div>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
                 <div className='p-5 border rounded-lg shadow-md'>
-                    Contoller
+                    <Controller selectedTheme={(value) => {
+                        updateFields(value, 'theme')
+                        setselectedTheme(value)
+                    }} selectedBG={(value) => {
+                        updateFields(value, 'background')
+                        setSelectedBG(value)
+                    }}
+                        selectedStyle={(name, value, key) => {
+                            const style = { name, value, key };
+                            updateFields(style, 'styles');
+                            setSelectedStyle(style);
+                        }} />
                 </div>
-                <div className='md:col-span-2 border rounder-lg shadow-md p-4 flex items-center justify-center'>
-                    <FormUI jsonForm={jsonForm} selectedTheme={selectedTheme} onFieldUpdate={onFieldUpdate} deleteField={(index) => deleteField(index)} />
+                <div className='md:col-span-2 border rounder-lg shadow-md p-4 flex items-center justify-center' style={{ backgroundImage: selectedBG }}>
+                    <FormUI jsonForm={jsonForm} selectedTheme={selectedTheme} selectedStyle={selectedStyle} onFieldUpdate={onFieldUpdate} deleteField={(index) => deleteField(index)} />
                 </div>
             </div>
         </div>

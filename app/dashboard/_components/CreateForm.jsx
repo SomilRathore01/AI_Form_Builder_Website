@@ -48,7 +48,7 @@ const CreateForm = () => {
     }
     return (
         <div>
-            <Button onClick={()=>setOpenDialog(true)}>Create Form</Button>
+            <Button className='bg-primary' onClick={()=>setOpenDialog(true)}>Create Form</Button>
             <Dialog open = {openDialog}>
                 
                 <DialogContent>
@@ -60,7 +60,7 @@ const CreateForm = () => {
                             placeholder="Write the description about your form"/>
                             <div className='flex gap-2 my-3 justify-end'>
                                 <Button onClick={()=>setOpenDialog(false)} variant='destructive'>Cancel</Button>
-                                <Button disabled={loading} onClick={()=>oncreateform()}>{loading? <Loader2 className='animate-spin'/>: 'Create'}</Button>
+                                <Button className='bg-primary' disabled={loading} onClick={()=>oncreateform()}>{loading? <Loader2 className='animate-spin'/>: 'Create'}</Button>
                             </div>
                         </DialogDescription>
                     </DialogHeader>

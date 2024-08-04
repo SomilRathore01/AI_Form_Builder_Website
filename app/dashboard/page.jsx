@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import React from 'react'
 import CreateForm from './_components/CreateForm'
+import FormList from './_components/FormList'
 
 const Dashboard = () => {
   return (
@@ -9,6 +10,8 @@ const Dashboard = () => {
         Dashboard
         <CreateForm/>
       </h2>
+      {/* List of Form */}
+      <FormList/>
     </div>
   )
 }
